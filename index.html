@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Users Feed</title>
+
+    <link rel="stylesheet" href="styles.css">
+</head>
+
+<body>
+
+    <header>
+        <h1>Users Feed</h1>
+        <p>JSONPlaceholder Users</p>
+    </header>
+
+    <main>
+        <div id="usersContainer" class="users-container">
+            <p id="loading">Loading users...</p>
+        </div>
+    </main>
+
+
+    <script>
+
+        // API URL
+        const API_URL =
+            "https://jsonplaceholder.typicode.com/users";
+
+
+        // Container
+        const usersContainer =
+            document.getElementById("usersContainer");
+
+
+        // Fetch first 6 users
+        async function fetchUsers() {
+
+            try {
+
+                const response =
+                    await fetch(API_URL);
+
+                if (!response.ok) {
+                    throw new Error("Failed to fetch users");
+                }
+
+                const users =
+                    await response.json();
+
+                // First 6 users
+                const firstSixUsers =
+                    users.slice(0, 6);
+
+                // Remove loading text
+                usersContainer.innerHTML = "";
+
+                // Create cards
+                firstSixUsers.forEach(user => {
+                    createUserCard(user);
+                });
+
+            } catch (error) {
+
+                usersContainer.innerHTML =
+                    "<p class='error'>Failed to load users.</p>";
+
+                console.error(error);
+            }
+        }
+
+
+        // Create user card
+        function createUserCard(user) {
+
+            const card =
+                document.createElement("div");
+
+            card.className = "user-card";
+
+            card.innerHTML = `
+                <h2>${user.name}</h2>
+
+                <p>
+                    <strong>Username:</strong>
+                    ${user.username}
+                </p>
+
+                <p>
+                    <strong>Email:</strong>
+                    ${user.email}
+                </p>
+
+                <button class="remove-btn">
+                    Remove User
+                </button>
+            `;
+
+
+            // Remove button
+            const removeButton =
+                card.querySelector(".remove-btn");
+
+
+            removeButton.addEventListener(
+                "click",
+                () => removeUser(user.id, card)
+            );
+
+
+            usersContainer.appendChild(card);
+        }
+
+
+        // Delete user
+        async function removeUser(userId, card) {
+
+            try {
+
+                const response =
+                    await fetch(
+                        `${API_URL}/${userId}`,
+                        {
+                            method: "DELETE"
+                        }
+                    );
+
+
+                // Only remove if status = 200
+                if (response.status === 200) {
+
+                    card.remove();
+
+                } else {
+
+                    alert("Failed to remove user.");
+
+                }
+
+            } catch (error) {
+
+                console.error(error);
+
+                alert("Something went wrong.");
+            }
+        }
+
+
+        // Start
+        fetchUsers();
+
+    </script>
+
+</body>
+
+</html>
